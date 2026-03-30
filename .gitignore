@@ -21,6 +21,7 @@
 
 # --- Results / outputs ---
 results/
+*.log
 *.out
 *.err
 *.gz
