@@ -1,3 +1,35 @@
+# --- Genomics / Large data files ---
+*.vcf
+*.vcf.gz
+*.bcf
+*.bed
+*.bim
+*.fam
+*.gen
+*.pgen
+*.pvar
+*.psam
+*.sample
+*.haps
+*.legend
+
+# --- Imputation / reference data ---
+*.m3vcf.gz
+*.info
+*.dose
+*.impute2
+
+# --- Results / outputs ---
+results/
+*.out
+*.err
+*.gz
+*.bgz
+
+# --- HPC / job scheduler files ---
+*.o
+*.e
+slurm-*.out
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
@@ -56,7 +88,6 @@ cover/
 *.pot
 
 # Django stuff:
-*.log
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
