@@ -10,6 +10,12 @@ The workflow spans the full analysis lifecycle from genotype-level data through 
 
 This repository contains a **generalised example workflow** and does not include any proprietary or sensitive data.
 
+--
+
+## Status
+
+This repository contains the structure and documentation for an active computational genomics workflow. Scripts and example implementations are currently being finalised and will be uploaded shortly.
+
 ---
 
 ## Key Features
