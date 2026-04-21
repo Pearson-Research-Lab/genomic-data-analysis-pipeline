@@ -124,11 +124,8 @@ Large genomic data files and intermediate outputs are excluded from version cont
 ## Example Usage
 
 ```bash
-bash scripts/01_qc.sh
-bash scripts/02_pre_imputation.sh
-bash scripts/03_post_imputation_qc.sh
-bash scripts/04_gwas.sh
-Rscript scripts/05_plots.R
+bash qc/run_preimputation_qc.sh
+bash gwas/run_gwas_pipeline.sh
 ```
 
 ---
@@ -138,6 +135,68 @@ Rscript scripts/05_plots.R
 * This repository contains example scripts and workflow structure only
 * No real genomic or patient data are included
 * File names and paths are generalised for demonstration purposes
+
+---
+
+## Citations
+
+If you use this pipeline, please cite the following software and resources:
+
+### GWAS and mixed model analysis
+
+- **GMMAT**  
+  Chen H, Wang C, Conomos MP, et al.  
+  *Control for population structure and relatedness for binary traits in genetic association studies via logistic mixed models.*  
+  American Journal of Human Genetics. 2016;98(4):653–666.
+
+- **GENESIS**  
+  Conomos MP, Miller MB, Thornton TA.  
+  *Robust inference of population structure for ancestry prediction and correction of stratification in the presence of relatedness.*  
+  Genetic Epidemiology. 2015;39(4):276–293.
+
+---
+
+### Genotype processing and QC
+
+- **PLINK / PLINK2**  
+  Chang CC, Chow CC, Tellier LC, et al.  
+  *Second-generation PLINK: rising to the challenge of larger and richer datasets.*  
+  GigaScience. 2015;4:7.
+
+- **bcftools**  
+  Danecek P, Bonfield JK, Liddle J, et al.  
+  *Twelve years of SAMtools and BCFtools.*  
+  GigaScience. 2021;10(2):giab008.
+
+---
+
+### Reference panels and imputation
+
+- **1000 Genomes Project (Phase 3)**  
+  The 1000 Genomes Project Consortium.  
+  *A global reference for human genetic variation.*  
+  Nature. 2015;526:68–74.
+
+- **Michigan Imputation Server**  
+  Das S, Forer L, Schönherr S, et al.  
+  *Next-generation genotype imputation service and methods.*  
+  Nature Genetics. 2016;48:1284–1287.
+
+---
+
+### GWAS visualisation
+
+- **qqman (R package)**  
+  Turner SD.  
+  *qqman: an R package for visualizing GWAS results using Q-Q and manhattan plots.*  
+  bioRxiv. 2014. doi:10.1101/005165
+
+---
+
+## Acknowledgements
+
+This pipeline was developed based on a study-specific statistical analysis plan (SAP) and internal methodological guidance.  
+Implementation reflects practical decisions made during analysis, including model selection and QC thresholds.
 
 ---
 
