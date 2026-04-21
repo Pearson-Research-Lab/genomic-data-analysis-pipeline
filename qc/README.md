@@ -102,4 +102,5 @@ European-only and mixed-ancestry datasets were imputed independently.
 
 ## Pipeline implementation
 
-Pre-imputation QC script:
+Pre-imputation QC script:  
+[`run_preimputation_qc.sh`](run_preimputation_qc.sh)
