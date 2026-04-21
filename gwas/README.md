@@ -83,6 +83,24 @@ This directory should contain the all-participant trial-arm cohorts, for example
 
 These files are used by `gwas_all.R`.
 
+### Cohort naming requirement
+
+Cohort RDS filenames must follow this convention:
+
+- Intervention arm: `albi_*`
+- Comparator arm: `placebo_*`
+
+- Sex strata:
+  - `_all`
+  - `_female`
+  - `_male`
+
+Examples:
+- `albi_all.rds`
+- `placebo_female.rds`
+
+These names are used to construct SAP-compliant output filenames.
+
 #### Sex-stratified directory
 
 This directory should contain arm- and sex-specific cohorts, for example:
