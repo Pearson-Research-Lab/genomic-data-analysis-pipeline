@@ -7,7 +7,7 @@ The pipeline implements mixed-model GWAS using a genetic relationship matrix (GR
 - **Mixed-ancestry analyses** *(primary analysis)*
 - **European-only analyses** *(sensitivity analysis)*
 
-Analyses are performed separately by ancestry, trial arm, and sex stratum, consistent with the study design described in the analysis plan. 
+Analyses are performed separately by ancestry, trial arm, and sex stratum, consistent with the study design.
 
 ---
 
@@ -16,7 +16,7 @@ Analyses are performed separately by ancestry, trial arm, and sex stratum, consi
 Within each ancestry set, GWAS analyses are run separately for:
 
 - **Trial arm**
-  - Intervention (`albi`; albiglutide)
+  - Intervention (`albi`)
   - Placebo
 
 - **Sex stratum**
@@ -24,101 +24,72 @@ Within each ancestry set, GWAS analyses are run separately for:
   - Female-only
   - Male-only
 
-The scripts in this directory support:
+The pipeline consists of:
 
-1. PCA and GRM generation from GWAS-ready genotype data
-2. All-participant GWAS within each trial arm
-3. Sex-stratified GWAS within each trial arm
-
-The implementation reflects the study pipeline used in practice, including the use of logistic mixed models for outcomes 26–28 so that relatedness could be handled within the same GRM-based framework. 
+1. PCA and GRM generation  
+2. All-participant GWAS  
+3. Sex-stratified GWAS  
+4. SAP-compliant result formatting  
+5. (Optional) downstream visualisation  
 
 ---
 
-## Pipeline Components
-
-| Script | Description |
-|--------|-------------|
-| `config_example.R` | Example configuration file defining ancestry-specific paths and phenotype mappings |
-| `pcair.R` | Generates principal components (PCs) and a GRM from GWAS-ready PLINK input |
-| `gwas_all.R` | Runs GWAS for all participants within each trial arm |
-| `gwas_sexstratified.R` | Runs GWAS for sex-stratified cohorts |
+## Directory Structure
+gwas/
+├── README.md
+├── config_example.R
+├── pcair.R
+├── gwas_all.R
+├── gwas_sexstratified.R
+├── format_and_rename_gwas.R
+└── run_gwas_pipeline.sh
 
 ---
 
 ## Input Data
 
-### 1. Genotype data
+### Genotype data
 
-These scripts expect a **GWAS-ready PLINK binary dataset** (`.bed/.bim/.fam`) for each ancestry.
+GWAS-ready PLINK binary files (`.bed/.bim/.fam`) derived from post-imputation QC:
 
-These PLINK datasets are derived from the post-imputation QC outputs and should already have been:
+- INFO filtered (R² ≥ 0.5)
+- MAF ≥ 0.01
+- Biallelic variants only
+- Monomorphic variants removed
+- Variant IDs formatted as `chr:pos:ref:alt`
 
-- filtered on imputation quality (`R2 >= 0.5`)
-- filtered on minor allele frequency (`MAF >= 0.01`)
-- restricted to biallelic variants
-- cleared of monomorphic variants
-- harmonised to `chr:pos:ref:alt` variant IDs
-- merged across chromosomes
-- converted to PLINK binary format
-
-Separate genotype datasets are used for:
-
-- mixed-ancestry analysis
-- European-only sensitivity analysis
-
-This matches the QC workflow described upstream in the repository. :contentReference[oaicite:5]{index=5}
+Separate datasets are used for:
+- mixed ancestry (primary)
+- European-only (sensitivity)
 
 ---
 
-### 2. Phenotype data
+### Phenotype data
 
-Phenotype inputs are supplied as RDS files containing cohort-specific data.
+Cohort data are provided as RDS files.
 
-#### Full cohort directory
+Each cohort must include:
 
-This directory should contain the all-participant trial-arm cohorts, for example:
+#### All-participant cohorts
+- `ID`
+- `Age`
+- `Sex`
+- `Binary.Insulin`
+- `PC1–PC10`
+- phenotype columns defined in config
 
-- `albi_all.rds`
-- `placebo_all.rds`
-
-These files are used by `gwas_all.R`.
-
-### Cohort naming requirement
-
-Cohort RDS filenames must follow this convention:
-
-- Intervention arm: `albi_*`
-- Comparator arm: `placebo_*`
-
-- Sex strata:
-  - `_all`
-  - `_female`
-  - `_male`
-
-Examples:
-- `albi_all.rds`
-- `placebo_female.rds`
-
-These names are used to construct SAP-compliant output filenames.
-
-#### Sex-stratified directory
-
-This directory should contain arm- and sex-specific cohorts, for example:
-
-- `albi_female.rds`
-- `albi_male.rds`
-- `placebo_female.rds`
-- `placebo_male.rds`
-
-These files are used by `gwas_sexstratified.R`.
-
-The scripts use the RDS filename stem as the cohort label in output filenames.
+#### Sex-stratified cohorts
+- `ID`
+- `Age`
+- `Binary.Insulin`
+- `PC1–PC10`
+- phenotype columns defined in config
 
 ---
 
 ## Configuration
 
-All paths, ancestry-specific inputs, and phenotype column mappings are controlled through a config file.
+All paths and cohort definitions are controlled via a config file.
 
 Copy and edit:
 
