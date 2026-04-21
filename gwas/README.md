@@ -49,6 +49,9 @@ gwas/
 
 ---
 
+
+---
+
 ## Input Data
 
 ### Genotype data
@@ -88,7 +91,9 @@ Each cohort must include:
 - `PC1–PC10`
 - phenotype columns defined in config
 
-  ## Results visualisation
+---
+
+## Results visualisation
 
 Formatted GWAS result files can be visualised using `results_visualisation.R`.
 
@@ -98,14 +103,4 @@ Example:
 Rscript results_visualisation.R \
   --input /path/to/formatted_results/E_A1CP_I_ALL.csv \
   --outdir /path/to/plots
-
----
-
-## Configuration
-
-All paths and cohort definitions are controlled via a config file.
-
-Copy and edit:
-
-```bash
-cp config_example.R config_study.R
+```
