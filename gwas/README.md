@@ -35,6 +35,8 @@ The pipeline consists of:
 ---
 
 ## Directory Structure
+
+```
 gwas/
 ├── README.md
 ├── config_example.R
@@ -43,6 +45,7 @@ gwas/
 ├── gwas_sexstratified.R
 ├── format_and_rename_gwas.R
 └── run_gwas_pipeline.sh
+```
 
 ---
 
