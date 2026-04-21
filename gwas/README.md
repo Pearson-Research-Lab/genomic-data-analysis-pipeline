@@ -88,6 +88,17 @@ Each cohort must include:
 - `PC1–PC10`
 - phenotype columns defined in config
 
+  ## Results visualisation
+
+Formatted GWAS result files can be visualised using `results_visualisation.R`.
+
+Example:
+
+```bash
+Rscript results_visualisation.R \
+  --input /path/to/formatted_results/E_A1CP_I_ALL.csv \
+  --outdir /path/to/plots
+
 ---
 
 ## Configuration
