@@ -15,9 +15,7 @@ parse_args <- function(args) {
   i <- 1
   while (i <= length(args)) {
     key <- args[i]
-    if (!startsWith(key, "--")) {
-      stop("Arguments must be supplied as --key value")
-    }
+    if (!startsWith(key, "--")) stop("Arguments must be supplied as --key value")
     key <- sub("^--", "", key)
 
     if (i == length(args) || startsWith(args[i + 1], "--")) {
@@ -46,27 +44,21 @@ build_pc_terms <- function(pc_count = 10) {
 
 build_formula_continuous_no_baseline <- function(pheno_col, include_sex = TRUE, pc_count = 10) {
   base_terms <- c("Age", "Binary.Insulin")
-  if (include_sex) {
-    base_terms <- c(base_terms, "Sex")
-  }
+  if (include_sex) base_terms <- c(base_terms, "Sex")
   rhs <- paste(c(base_terms, build_pc_terms(pc_count)), collapse = " + ")
   as.formula(paste(pheno_col, "~", rhs))
 }
 
 build_formula_continuous_with_baseline <- function(pheno_col, baseline_col, include_sex = TRUE, pc_count = 10) {
   base_terms <- c("Age", "Binary.Insulin")
-  if (include_sex) {
-    base_terms <- c(base_terms, "Sex")
-  }
+  if (include_sex) base_terms <- c(base_terms, "Sex")
   rhs <- paste(c(baseline_col, base_terms, build_pc_terms(pc_count)), collapse = " + ")
   as.formula(paste(pheno_col, "~", rhs))
 }
 
 build_formula_binary <- function(pheno_col, include_sex = TRUE, pc_count = 10) {
   base_terms <- c("Age", "Binary.Insulin")
-  if (include_sex) {
-    base_terms <- c(base_terms, "Sex")
-  }
+  if (include_sex) base_terms <- c(base_terms, "Sex")
   rhs <- paste(c(base_terms, build_pc_terms(pc_count)), collapse = " + ")
   as.formula(paste(pheno_col, "~", rhs))
 }
@@ -74,10 +66,7 @@ build_formula_binary <- function(pheno_col, include_sex = TRUE, pc_count = 10) {
 check_columns_exist <- function(data, cols, cohort_label) {
   missing_cols <- setdiff(cols, colnames(data))
   if (length(missing_cols) > 0) {
-    stop(
-      "Missing required columns in cohort '", cohort_label, "': ",
-      paste(missing_cols, collapse = ", ")
-    )
+    stop("Missing required columns in cohort '", cohort_label, "': ", paste(missing_cols, collapse = ", "))
   }
 }
 
@@ -102,9 +91,7 @@ if (length(missing_required) > 0) {
 
 cfg <- load_config(args[["config"]])
 ancestry_name <- args[["ancestry"]]
-if (!ancestry_name %in% names(cfg$ancestry)) {
-  stop("Unknown ancestry: ", ancestry_name)
-}
+if (!ancestry_name %in% names(cfg$ancestry)) stop("Unknown ancestry: ", ancestry_name)
 
 analysis_cfg <- cfg$ancestry[[ancestry_name]]
 outdir <- args[["outdir"]]
@@ -113,104 +100,77 @@ dir.create(outdir, recursive = TRUE, showWarnings = FALSE)
 dir.create(file.path(outdir, "fits"), recursive = TRUE, showWarnings = FALSE)
 dir.create(file.path(outdir, "results"), recursive = TRUE, showWarnings = FALSE)
 
-grm <- readRDS(analysis_cfg$grm_rds)
-grm <- as.matrix(grm)
+grm <- as.matrix(readRDS(analysis_cfg$grm_rds))
 genotype_prefix <- analysis_cfg$genotype_prefix
-
-cohort_files <- list.files(
-  analysis_cfg$full_cohort_dir,
-  pattern = "\\.rds$",
-  full.names = TRUE
-)
-
-if (length(cohort_files) == 0) {
-  stop("No RDS files found in: ", analysis_cfg$full_cohort_dir)
-}
 
 pc_count <- cfg$gwas$pc_count
 maf_range <- cfg$gwas$maf_range
 missing_method <- cfg$gwas$missing_method
 nperbatch <- cfg$gwas$nperbatch
 
-for (cohort_file in cohort_files) {
-  pheno <- readRDS(cohort_file)
-  cohort_label <- tools::file_path_sans_ext(path_file(cohort_file))
+for (cohort in analysis_cfg$cohorts_all) {
+  if (!file.exists(cohort$file)) stop("Missing cohort file: ", cohort$file)
+
+  pheno <- readRDS(cohort$file)
+  cohort_label <- cohort$label
 
   for (outcome_id in names(cfg$outcomes$continuous_no_baseline)) {
     pheno_col <- cfg$outcomes$continuous_no_baseline[[outcome_id]]
-
-    required_cols <- c(
-      pheno_col, "Age", "Sex", "Binary.Insulin",
-      paste0("PC", seq_len(pc_count)), "ID"
-    )
+    required_cols <- c(pheno_col, "Age", "Sex", "Binary.Insulin", paste0("PC", seq_len(pc_count)), "ID")
     check_columns_exist(pheno, required_cols, cohort_label)
 
     fit <- glmmkin(
       build_formula_continuous_no_baseline(pheno_col, include_sex = TRUE, pc_count = pc_count),
-      data = pheno,
-      kins = grm,
-      id = "ID",
-      verbose = FALSE,
+      data = pheno, kins = grm, id = "ID", verbose = FALSE,
       family = gaussian(link = "identity")
     )
 
-    fit_file <- file.path(outdir, "fits", paste0("fit_", outcome_id, "_", cohort_label, ".rds"))
-    out_file <- file.path(outdir, "results", paste0("gwas", outcome_id, "_", cohort_label, ".txt"))
-
-    saveRDS(fit, fit_file)
-    run_score_test(fit, genotype_prefix, out_file, maf_range, missing_method, nperbatch)
+    saveRDS(fit, file.path(outdir, "fits", paste0("fit_", outcome_id, "_", cohort_label, ".rds")))
+    run_score_test(
+      fit, genotype_prefix,
+      file.path(outdir, "results", paste0("gwas", outcome_id, "_", cohort_label, ".txt")),
+      maf_range, missing_method, nperbatch
+    )
   }
 
   for (outcome_id in names(cfg$outcomes$continuous_with_baseline)) {
     outcome_spec <- cfg$outcomes$continuous_with_baseline[[outcome_id]]
     pheno_col <- outcome_spec$pheno
     baseline_col <- outcome_spec$baseline
-
-    required_cols <- c(
-      pheno_col, baseline_col, "Age", "Sex", "Binary.Insulin",
-      paste0("PC", seq_len(pc_count)), "ID"
-    )
+    required_cols <- c(pheno_col, baseline_col, "Age", "Sex", "Binary.Insulin", paste0("PC", seq_len(pc_count)), "ID")
     check_columns_exist(pheno, required_cols, cohort_label)
 
     fit <- glmmkin(
       build_formula_continuous_with_baseline(pheno_col, baseline_col, include_sex = TRUE, pc_count = pc_count),
-      data = pheno,
-      kins = grm,
-      id = "ID",
-      verbose = FALSE,
+      data = pheno, kins = grm, id = "ID", verbose = FALSE,
       family = gaussian(link = "identity")
     )
 
-    fit_file <- file.path(outdir, "fits", paste0("fit_", outcome_id, "_", cohort_label, ".rds"))
-    out_file <- file.path(outdir, "results", paste0("gwas", outcome_id, "_", cohort_label, ".txt"))
-
-    saveRDS(fit, fit_file)
-    run_score_test(fit, genotype_prefix, out_file, maf_range, missing_method, nperbatch)
+    saveRDS(fit, file.path(outdir, "fits", paste0("fit_", outcome_id, "_", cohort_label, ".rds")))
+    run_score_test(
+      fit, genotype_prefix,
+      file.path(outdir, "results", paste0("gwas", outcome_id, "_", cohort_label, ".txt")),
+      maf_range, missing_method, nperbatch
+    )
   }
 
   for (outcome_id in names(cfg$outcomes$binary)) {
     pheno_col <- cfg$outcomes$binary[[outcome_id]]
-
-    required_cols <- c(
-      pheno_col, "Age", "Sex", "Binary.Insulin",
-      paste0("PC", seq_len(pc_count)), "ID"
-    )
+    required_cols <- c(pheno_col, "Age", "Sex", "Binary.Insulin", paste0("PC", seq_len(pc_count)), "ID")
     check_columns_exist(pheno, required_cols, cohort_label)
 
     fit <- glmmkin(
       build_formula_binary(pheno_col, include_sex = TRUE, pc_count = pc_count),
-      data = pheno,
-      kins = grm,
-      id = "ID",
-      verbose = FALSE,
+      data = pheno, kins = grm, id = "ID", verbose = FALSE,
       family = binomial(link = "logit")
     )
 
-    fit_file <- file.path(outdir, "fits", paste0("fit_", outcome_id, "_", cohort_label, ".rds"))
-    out_file <- file.path(outdir, "results", paste0("gwas", outcome_id, "_", cohort_label, ".txt"))
-
-    saveRDS(fit, fit_file)
-    run_score_test(fit, genotype_prefix, out_file, maf_range, missing_method, nperbatch)
+    saveRDS(fit, file.path(outdir, "fits", paste0("fit_", outcome_id, "_", cohort_label, ".rds")))
+    run_score_test(
+      fit, genotype_prefix,
+      file.path(outdir, "results", paste0("gwas", outcome_id, "_", cohort_label, ".txt")),
+      maf_range, missing_method, nperbatch
+    )
   }
 }
 
