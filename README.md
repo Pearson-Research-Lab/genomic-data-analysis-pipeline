@@ -125,6 +125,7 @@ Large genomic data files and intermediate outputs are excluded from version cont
 
 ```bash
 bash qc/run_preimputation_qc.sh
+bash qc/run_postimputation_qc.sh
 bash gwas/run_gwas_pipeline.sh
 ```
 
