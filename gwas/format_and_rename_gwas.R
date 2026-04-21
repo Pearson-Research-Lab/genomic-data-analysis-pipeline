@@ -65,11 +65,15 @@ sap_outcome_code <- function(outcome_id) {
     "27" = "O_HFHOSP",
     "28" = "O_PRIMHF"
   )
-  if (!outcome_id %in% names(map)) stop("No SAP phenotype code found for outcome ID: ", outcome_id)
+  if (!outcome_id %in% names(map)) {
+    stop("No SAP phenotype code found for outcome ID: ", outcome_id)
+  }
   unname(map[[outcome_id]])
 }
 
-make_join_id <- function(x) sub("(:[^:]+){2}$", "", x)
+make_join_id <- function(x) {
+  sub("(:[^:]+){2}$", "", x)
+}
 
 extract_outcome_id <- function(filename) {
   m <- str_match(filename, "gwas([0-9]+)_")
@@ -86,10 +90,27 @@ extract_cohort_label <- function(filename) {
 build_cohort_map <- function(analysis_cfg) {
   cohorts <- c(analysis_cfg$cohorts_all, analysis_cfg$cohorts_sex)
   out <- lapply(cohorts, function(x) {
-    list(label = x$label, arm = x$arm, sex = x$sex)
+    list(
+      label = x$label,
+      file = x$file,
+      arm = x$arm,
+      sex = x$sex
+    )
   })
   names(out) <- vapply(cohorts, function(x) x$label, character(1))
   out
+}
+
+get_event_count <- function(cohort_file, outcome_id, cfg) {
+  pheno <- readRDS(cohort_file)
+
+  pheno_col <- cfg$outcomes$binary[[outcome_id]]
+
+  if (is.null(pheno_col) || !(pheno_col %in% colnames(pheno))) {
+    stop("Cannot find binary phenotype column for outcome ", outcome_id, " in ", cohort_file)
+  }
+
+  sum(pheno[[pheno_col]] == 1, na.rm = TRUE)
 }
 
 format_continuous <- function(x) {
@@ -122,12 +143,13 @@ format_continuous <- function(x) {
     filter(!duplicated(MARKER))
 }
 
-format_binary <- function(x) {
+format_binary <- function(x, n_events) {
   x$CALLRATE <- 1 - x$F_MISS
   x$STRAND <- "+"
   x$BETA <- x$SCORE / x$VAR
   x$SE <- abs(x$BETA / qnorm(x$PVAL / 2))
   x$QUAL_TYPE <- ifelse(x$TYPE == "IMPUTED", 1, 0)
+  x$N_EVENTS <- n_events
 
   x %>%
     mutate(
@@ -145,7 +167,7 @@ format_binary <- function(x) {
     ) %>%
     select(
       MARKER, STRAND, CHR, POS, EFFECT_ALLELE, OTHER_ALLELE,
-      N_SAMPLE, EAF, BETA, SE, P, IMPUTED, P_HWE,
+      N_SAMPLE, N_EVENTS, EAF, BETA, SE, P, IMPUTED, P_HWE,
       CALLRATE, QUAL_SCORE, QUAL_TYPE
     ) %>%
     filter(!duplicated(MARKER))
@@ -160,7 +182,9 @@ if (length(missing_required) > 0) {
 
 cfg <- load_config(args[["config"]])
 ancestry_name <- args[["ancestry"]]
-if (!ancestry_name %in% names(cfg$ancestry)) stop("Unknown ancestry: ", ancestry_name)
+if (!ancestry_name %in% names(cfg$ancestry)) {
+  stop("Unknown ancestry: ", ancestry_name)
+}
 
 analysis_cfg <- cfg$ancestry[[ancestry_name]]
 cohort_map <- build_cohort_map(analysis_cfg)
@@ -181,7 +205,9 @@ hwe$ID <- make_join_id(hwe$SNP)
 cr$ID <- make_join_id(cr$SNP)
 
 result_files <- list.files(results_dir, pattern = "^gwas[0-9]+_.*\\.txt$", full.names = TRUE)
-if (length(result_files) == 0) stop("No GWAS result files found in: ", results_dir)
+if (length(result_files) == 0) {
+  stop("No GWAS result files found in: ", results_dir)
+}
 
 for (f in result_files) {
   a <- fread(f)
@@ -194,8 +220,9 @@ for (f in result_files) {
     stop("Cohort label not found in config: ", cohort_label)
   }
 
+  cohort_info <- cohort_map[[cohort_label]]
   sap_code <- sap_outcome_code(outcome_id)
-  suffix <- paste(cohort_map[[cohort_label]]$arm, cohort_map[[cohort_label]]$sex, sep = "_")
+  suffix <- paste(cohort_info$arm, cohort_info$sex, sep = "_")
   out_name <- paste0(sap_code, "_", suffix, ".csv")
 
   merged <- a %>%
@@ -207,7 +234,8 @@ for (f in result_files) {
   if (as.integer(outcome_id) <= 20) {
     out <- format_continuous(merged)
   } else {
-    out <- format_binary(merged)
+    n_events <- get_event_count(cohort_info$file, outcome_id, cfg)
+    out <- format_binary(merged, n_events = n_events)
   }
 
   fwrite(out, file.path(outdir, out_name))
