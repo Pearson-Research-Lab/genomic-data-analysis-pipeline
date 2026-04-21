@@ -8,7 +8,7 @@ This repository contains a modular, reproducible workflow for processing and ana
 
 The workflow spans the full analysis lifecycle from genotype-level data through to association testing and result visualisation, and is designed for scalable, flexible, and reproducible genomic analyses in large cohort settings. It reflects real-world pipelines used in GWAS and cohort-based genomic studies, with compatibility for extension to multi-omics data integration.
 
-This repository contains a **generalised example workflow** and does not include any proprietary or sensitive data.
+This repository contains a **generalised example workflow** and does not include any proprietary or sensitive data. The pipeline is designed to both document a study-specific GWAS workflow and provide a configurable framework that can be adapted to other analyses based on user-defined statistical analysis plans (SAPs).
 
 ## Project context
 
@@ -46,7 +46,7 @@ The results are intended to serve as input for downstream meta-GWAS analyses int
 
 * Integration with external imputation workflows (e.g. Michigan Imputation Server)
 * Handling of phased genotype data
-* Harmonisation across cohorts or genotyping platforms, including double-imputation workflows
+* Harmonisation across cohorts or genotyping platforms, with support for double-imputation workflows
   
 ### 4. Post-Imputation Quality Control
 
@@ -75,19 +75,21 @@ The results are intended to serve as input for downstream meta-GWAS analyses int
 genomic-data-analysis-pipeline/
 │
 ├── README.md
-├── scripts/
-│   ├── 01_qc.sh
-│   ├── 02_pre_imputation.sh
-│   ├── 03_post_imputation_qc.sh
-│   ├── 04_gwas.sh
-│   └── 05_plots.R
-│
-├── config/
-│   └── parameters.txt
-│
-├── example_data/
-│
-└── results/
+├── qc/
+│   ├── README.md
+│   ├── run_preimputation_qc.sh
+│   ├── run_postimputation_qc.sh
+│   
+├── gwas/
+│   ├── README.md
+│   ├── run_gwas_pipeline.sh
+│   ├── config_example.R
+│   ├── results_visualisation.R
+│   ├── format_and_rename_gwas.R
+│   ├── gwas_all.R
+│   ├── gwas_sexstratified.R
+│   ├── generate_grm.R 
+
 ```
 
 ---
@@ -96,7 +98,7 @@ genomic-data-analysis-pipeline/
 
 * PLINK / PLINK2
 * bcftools
-* R (data.table, qqman; mixed-model association methods using GMMAT and SAIGE)
+* R (data.table, qqman; mixed-model association methods using GMMAT and GENESIS)
 * Bash / Linux scripting
 * High-performance computing (SGE / SLURM)
 
