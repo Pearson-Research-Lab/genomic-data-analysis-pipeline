@@ -10,9 +10,11 @@ The workflow spans the full analysis lifecycle from genotype-level data through 
 
 This repository contains a **generalised example workflow** and does not include any proprietary or sensitive data.
 
-## Status
+## Project context
 
-This repository contains the structure and documentation for an active computational genomics workflow. Scripts and example implementations are currently being finalised and will be uploaded shortly.
+This pipeline was developed for a cohort-specific, multi-ancestry GWAS evaluating associations between genetic variants and clinical biomarkers, as well as time-to-event outcomes.
+
+The results are intended to serve as input for downstream meta-GWAS analyses integrating genetic and clinical trial data across multiple drugs within the newer antihyperglycaemic drug classes (GLP1-RA, SGLT2i, DPP4i).
 
 ---
 
