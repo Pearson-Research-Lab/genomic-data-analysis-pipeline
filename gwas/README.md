@@ -104,3 +104,13 @@ Rscript results_visualisation.R \
   --input /path/to/formatted_results/E_A1CP_I_ALL.csv \
   --outdir /path/to/plots
 ```
+
+This generates:
+
+- `<filename>_manhattan.png`
+- `<filename>_qq.png`
+
+Plot titles include:
+- the input filename
+- sample size (`N_SAMPLE`)
+- and, for binary / outcome phenotypes, the number of events (`N_EVENTS`) if present in the formatted CSV
