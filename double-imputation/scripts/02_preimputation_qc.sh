@@ -18,8 +18,6 @@
 # Main output:
 #   ${base}/${batch}/qc_chr${chr}/chr${chr}_${batch}_readyforMIS.vcf.gz
 
-set -euo pipefail
-
 ############################################
 # User configuration
 ############################################
