@@ -1,0 +1,38 @@
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+
+# PLINK files
+*.nosex
+
+# VCF indexes
+*.tbi
+*.csi
+
+# SGE output
+*.o*
+*.e*
+
+# macOS
+.DS_Store
+
+# VS Code
+.vscode/
+
+# RStudio
+.Rhistory
+.RData
+.Rproj.user/
+
+# Python
+__pycache__/
+*.pyc
+
+# Large analysis outputs
+split_by_chr/
+qc_chr*/
+isec_chr*/
