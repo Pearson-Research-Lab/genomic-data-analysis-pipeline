@@ -6,11 +6,15 @@ When multiple cohorts or batches are imputed separately, differences in variant 
 
 The common variant scaffold is intentionally restricted to very high-confidence variants (typically INFO/R² ≥ 0.99) to minimise propagation of imputation uncertainty into the second imputation phase.
 
+## Notes
+
+The example scripts are configured for European ancestry datasets (`-p EUR`) and use the 1000 Genomes Phase 3 reference panel. These settings may require modification for other populations.
+
 ## Overview
 
 The pipeline performs:
 
-1. Raw genotype cleaning
+1. Raw genotype processing
 2. Variant ID harmonisation to `chr:pos:ref:alt`
 3. Per-chromosome splitting
 4. Biallelic SNP restriction
@@ -80,12 +84,20 @@ Second-phase Imputation
 Final Harmonised Dataset
 ```
 
+## Scripts
+
+| Script | Description |
+|----------|-------------|
+| `01_process_raw.sh` | Renames variants to `chr:pos:ref:alt` format and splits raw PLINK files into chromosome-specific datasets. |
+| `02_preimputation_qc.sh` | Performs pre-imputation QC, runs Will Rayner strand/reference checks, and prepares bgzipped VCFs for Michigan Imputation Server. |
+| `03_create_variant_scaffold.sh` | Performs post-imputation QC, identifies variants shared across all batches, and generates a common variant scaffold for second-phase imputation. |
+
 ## Outputs
 
 The pipeline generates:
 
 ```text
-harmonised/
+scaffold/
 second_phase_input/
 summary_statistics/
 logs/
