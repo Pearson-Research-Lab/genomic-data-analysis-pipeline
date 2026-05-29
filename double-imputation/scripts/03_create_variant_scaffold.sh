@@ -22,8 +22,6 @@
 #   This is disabled by default because merged post-imputation VCFs may not always
 #   convert cleanly back to PLINK format.
 
-set -euo pipefail
-
 ############################################
 # User configuration
 ############################################
